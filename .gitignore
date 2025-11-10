@@ -1,0 +1,41 @@
+# fhevm
+fhevmTemp
+
+# directories
+.coverage_artifacts
+.coverage_cache
+.coverage_contracts
+build
+coverage
+dist
+node_modules
+tmp
+
+# Keep important project files
+# artifacts - needed for deployment
+# cache - needed for faster compilation
+# types - generated types for contracts
+# deployments - deployment information
+
+# files
+*.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+*.log
+.DS_Store
+.pnp.*
+coverage.json
+pnpm-lock.yaml
+yarn.lock
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+ehthumbs.db
