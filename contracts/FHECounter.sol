@@ -8,6 +8,7 @@ import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 /// @author fhevm-hardhat-template
 /// @notice A very basic example contract showing how to work with encrypted data using FHEVM.
 /// @dev Demonstrates fundamental FHE operations: increment, decrement, and reset
+/// @dev This contract provides encrypted counter functionality with FHE operations
 contract FHECounter is SepoliaConfig {
     euint32 private _count;
 
@@ -17,16 +18,16 @@ contract FHECounter is SepoliaConfig {
         return _count;
     }
 
-    /// @notice Increments the counter by a specified encrypted value.
-    /// @param inputEuint32 the encrypted input value
-    /// @param inputProof the input proof
-    /// @dev This example omits overflow/underflow checks for simplicity and readability.
-    /// In a production contract, proper range checks should be implemented.
+/// @notice Increments the counter by a specified encrypted value.
+/// @param inputEuint32 the encrypted input value
+/// @param inputProof the input proof
+/// @dev This example omits overflow/underflow checks for simplicity and readability.
+/// In a production contract, proper range checks should be implemented.
     function increment(externalEuint32 inputEuint32, bytes calldata inputProof) external {
         require(inputProof.length > 0, "Proof cannot be empty");
-        euint32 encryptedEuint32 = FHE.fromExternal(inputEuint32, inputProof);
+        euint32 encryptedValue = FHE.fromExternal(inputEuint32, inputProof);
 
-        _count = FHE.add(_count, encryptedEuint32);
+        _count = FHE.add(_count, encryptedValue);
 
         FHE.allowThis(_count);
         FHE.allow(_count, msg.sender);
@@ -39,9 +40,9 @@ contract FHECounter is SepoliaConfig {
 /// In a production contract, proper range checks should be implemented.
     function decrement(externalEuint32 inputEuint32, bytes calldata inputProof) external {
         require(inputProof.length > 0, "Proof cannot be empty");
-        euint32 encryptedEuint32 = FHE.fromExternal(inputEuint32, inputProof);
+        euint32 encryptedValue = FHE.fromExternal(inputEuint32, inputProof);
 
-        _count = FHE.sub(_count, encryptedEuint32);
+        _count = FHE.sub(_count, encryptedValue);
 
         FHE.allowThis(_count);
         FHE.allow(_count, msg.sender);
