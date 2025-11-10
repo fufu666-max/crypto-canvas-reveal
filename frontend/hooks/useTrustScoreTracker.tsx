@@ -51,6 +51,10 @@ function getTrustScoreTrackerByChainId(
   };
 }
 
+/**
+ * Custom hook for managing TrustScoreTracker contract interactions
+ * Provides functionality for recording, retrieving, and decrypting trust scores
+ */
 export const useTrustScoreTracker = (parameters: {
   instance: FhevmInstance | undefined;
   fhevmDecryptionSignatureStorage: GenericStringStorage;
@@ -76,6 +80,7 @@ export const useTrustScoreTracker = (parameters: {
   const [totalScoreHandle, setTotalScoreHandle] = useState<string | undefined>(undefined);
   const [eventCount, setEventCount] = useState<number>(0);
   const [averageScoreHandle, setAverageScoreHandle] = useState<string | undefined>(undefined);
+  const [lastActivity, setLastActivity] = useState<number>(0);
   const [clearTotal, setClearTotal] = useState<ClearValueType | undefined>(undefined);
   const [clearAverage, setClearAverage] = useState<ClearValueType | undefined>(undefined);
   const [trustScores, setTrustScores] = useState<Array<{ index: number; handle: string; clear?: bigint }>>([]);
@@ -424,14 +429,14 @@ export const useTrustScoreTracker = (parameters: {
 
           setMessage(`Calling recordTrustEvent(${score})...`);
 
-          const tx: ethers.TransactionResponse = await contract.recordTrustEvent(
+          const tx: ethers.TransactionResponse = contract.recordTrustEvent(
             enc.handles[0],
             enc.inputProof
           );
 
           setMessage(`Waiting for tx:${tx.hash}...`);
 
-          const receipt = await tx.wait();
+          const receipt = tx.wait();
 
           setMessage(`Trust event recorded! Status=${receipt?.status}`);
 
@@ -443,17 +448,7 @@ export const useTrustScoreTracker = (parameters: {
           refreshScores();
         } catch (e: any) {
           console.error("Record trust event error:", e);
-          let errorMessage = "Record trust event failed!";
-          if (e.message?.includes("user rejected")) {
-            errorMessage = "Transaction was cancelled by user.";
-          } else if (e.message?.includes("insufficient funds")) {
-            errorMessage = "Insufficient funds for transaction.";
-          } else if (e.message?.includes("network")) {
-            errorMessage = "Network error. Please check your connection.";
-          } else if (e.message) {
-            errorMessage += ` ${e.message}`;
-          }
-          setMessage(errorMessage);
+          setMessage("Error occurred");
         } finally {
           isRecordingRef.current = false;
           setIsRecording(false);
