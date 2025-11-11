@@ -69,6 +69,11 @@ contract TrustScoreTracker is SepoliaConfig {
         // Update total score
         _userTotalScore[msg.sender] = FHE.add(_userTotalScore[msg.sender], encryptedTrustScore);
 
+        // Critical: Allow contract and user to access the encrypted total score
+        // Without these permissions, the encrypted data becomes inaccessible
+        FHE.allowThis(_userTotalScore[msg.sender]);
+        FHE.allow(_userTotalScore[msg.sender], msg.sender);
+
         // Increment event count (plaintext)
         _userEventCount[msg.sender] += 1;
 
@@ -84,6 +89,9 @@ contract TrustScoreTracker is SepoliaConfig {
             euint32 totalScore = _userTotalScore[msg.sender];
             euint32 average = FHE.div(totalScore, eventCount);
             _userAverageScore[msg.sender] = average;
+            // Essential: Set permissions for encrypted average score access
+            FHE.allowThis(_userAverageScore[msg.sender]);
+            FHE.allow(_userAverageScore[msg.sender], msg.sender);
         }
 
         // Emit event for tracking
