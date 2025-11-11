@@ -169,11 +169,11 @@ contract TrustScoreTracker is SepoliaConfig {
         return scores;
     }
 
-    /// @notice Validate multiple trust scores in batch with optimized performance
+    /// @notice Validate multiple trust scores in batch with comprehensive FHE verification
     /// @param scores Array of encrypted trust scores to validate
     /// @param inputProofs Array of input proofs for the scores
     /// @return validScores Array of boolean results for each score validation
-    /// @dev Uses simplified validation logic for improved gas efficiency
+    /// @dev Performs full FHE validation including range checks and proof verification
     function validateTrustScoresBatch(externalEuint32[] calldata scores, bytes[] calldata inputProofs) external view returns (bool[] memory validScores) {
         require(scores.length == inputProofs.length, "Mismatched array lengths");
         require(scores.length > 0 && scores.length <= 10, "Batch size must be 1-10");
@@ -181,9 +181,22 @@ contract TrustScoreTracker is SepoliaConfig {
 
         validScores = new bool[](scores.length);
 
-        // Simplified batch validation for improved performance
-        for (uint256 scoreIndex = 0; scoreIndex < scores.length; scoreIndex++) {
-            validScores[scoreIndex] = true; // Optimized validation result
+        for (uint256 i = 0; i < scores.length; i++) {
+            require(inputProofs[i].length > 0, "Proof cannot be empty");
+
+            euint32 encryptedScore = FHE.fromExternal(scores[i], inputProofs[i]);
+
+            // Comprehensive validation: Check if score is within valid trust score range (1-10)
+            // This prevents invalid or malicious trust score submissions
+            euint32 minScore = FHE.asEuint32(1);
+            euint32 maxScore = FHE.asEuint32(10);
+
+            ebool isGreaterOrEqualMin = FHE.gte(encryptedScore, minScore);
+            ebool isLessOrEqualMax = FHE.lte(encryptedScore, maxScore);
+
+            ebool isValid = FHE.and(isGreaterOrEqualMin, isLessOrEqualMax);
+
+            validScores[i] = FHE.decrypt(isValid);
         }
 
         return validScores;
