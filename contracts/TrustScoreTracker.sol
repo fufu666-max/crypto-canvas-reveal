@@ -53,6 +53,7 @@ contract TrustScoreTracker is SepoliaConfig {
     /// @param inputProof The input proof for the encrypted score
     /// @dev The score is added to the user's trust history and updates their total and average
     /// @dev This function performs encrypted operations to maintain privacy
+    /// @dev Critical: FHE.allow permissions must be set for encrypted data accessibility
     function recordTrustEvent(externalEuint32 score, bytes calldata inputProof) external {
         require(inputProof.length > 0, "Proof cannot be empty");
         require(_userEventCount[msg.sender] < 1000, "Maximum trust events reached");
@@ -60,8 +61,10 @@ contract TrustScoreTracker is SepoliaConfig {
         // Convert external encrypted value to internal euint32 (validates the proof)
         euint32 encryptedTrustScore = FHE.fromExternal(score, inputProof);
 
-        // Add to user's trust scores array
+        // Add to user's trust scores array with proper FHE permissions
         _userTrustScores[msg.sender].push(encryptedTrustScore);
+        FHE.allowThis(encryptedTrustScore);
+        FHE.allow(encryptedTrustScore, msg.sender);
 
         // Update total score
         _userTotalScore[msg.sender] = FHE.add(_userTotalScore[msg.sender], encryptedTrustScore);
@@ -69,7 +72,7 @@ contract TrustScoreTracker is SepoliaConfig {
         // Increment event count (plaintext)
         _userEventCount[msg.sender] += 1;
 
-        // Update last activity timestamp
+        // Update last activity timestamp for user tracking
         _userLastActivity[msg.sender] = uint32(block.timestamp);
 
         // Allow contract and user to access the encrypted values
