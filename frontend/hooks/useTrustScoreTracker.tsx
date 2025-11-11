@@ -429,16 +429,18 @@ export const useTrustScoreTracker = (parameters: {
 
           setMessage(`Calling recordTrustEvent(${score})...`);
 
-          const tx: ethers.TransactionResponse = contract.recordTrustEvent(
+          // Critical: Await the transaction to ensure proper async handling
+          const tx: ethers.TransactionResponse = await contract.recordTrustEvent(
             enc.handles[0],
             enc.inputProof
           );
 
           setMessage(`Waiting for tx:${tx.hash}...`);
 
-          const receipt = tx.wait();
+          // Essential: Await transaction confirmation for reliable state updates
+          const receipt = await tx.wait();
 
-          setMessage(`Trust event recorded! Status=${receipt?.status}`);
+          setMessage(`Trust event recorded successfully! Transaction status: ${receipt?.status}`);
 
           if (isStale()) {
             setMessage("Ignore recordTrustEvent");
