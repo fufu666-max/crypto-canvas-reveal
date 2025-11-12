@@ -21,10 +21,11 @@ contract TrustScoreTracker is SepoliaConfig {
     event TrustScoreQueried(address indexed user, uint8 queryType);
 
     /// @notice Emitted when trust score statistics are viewed
-    /// @param user The address of the user viewing statistics
+    /// @param user The address of the user viewing statistics (indexed for efficient querying)
     /// @param totalEvents The total number of events
     /// @param lastActivity The timestamp of last activity
-    event TrustStatisticsViewed(address user, uint32 totalEvents, uint32 lastActivity);
+    /// @dev Indexed user parameter enables efficient off-chain event filtering and monitoring
+    event TrustStatisticsViewed(address indexed user, uint32 totalEvents, uint32 lastActivity);
 
     /// @notice Emitted when decryption is requested for a user
     /// @param user The address of the user requesting decryption
