@@ -206,10 +206,13 @@ contract TrustScoreTracker is SepoliaConfig {
     /// @param score The encrypted trust score to validate
     /// @param inputProof The input proof for the score
     /// @return isValid True if score is between 1-10 inclusive
+    /// @dev Performs comprehensive validation including proof verification and range checking
     function validateTrustScore(externalEuint32 score, bytes calldata inputProof) external view returns (bool) {
+        require(inputProof.length > 0, "Proof cannot be empty - valid proof required for FHE operations");
         euint32 encryptedScore = FHE.fromExternal(score, inputProof);
 
-        // Check if score is >= 1 and <= 10
+        // Comprehensive validation: Check if score is within valid trust score range (1-10)
+        // This ensures only legitimate trust scores are accepted
         euint32 minScore = FHE.asEuint32(1);
         euint32 maxScore = FHE.asEuint32(10);
 
