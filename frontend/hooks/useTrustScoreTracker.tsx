@@ -450,7 +450,20 @@ export const useTrustScoreTracker = (parameters: {
           refreshScores();
         } catch (e: any) {
           console.error("Record trust event error:", e);
-          setMessage("Error occurred");
+          // Provide user-friendly error messages for better user experience
+          let errorMessage = "Failed to record trust event. Please try again.";
+          if (e.message?.includes("user rejected")) {
+            errorMessage = "Transaction was cancelled by user.";
+          } else if (e.message?.includes("insufficient funds")) {
+            errorMessage = "Insufficient funds for transaction. Please check your wallet balance.";
+          } else if (e.message?.includes("network")) {
+            errorMessage = "Network error. Please check your connection and try again.";
+          } else if (e.message?.includes("Maximum trust events reached")) {
+            errorMessage = "Maximum trust events limit reached. Cannot record more events.";
+          } else if (e.message) {
+            errorMessage += ` Details: ${e.message}`;
+          }
+          setMessage(errorMessage);
         } finally {
           isRecordingRef.current = false;
           setIsRecording(false);
