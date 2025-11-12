@@ -59,10 +59,12 @@ contract FHECounter is SepoliaConfig {
         FHE.allow(_count, msg.sender);
     }
 
-    /// @notice Resets the counter to zero
+    /// @notice Resets the counter to zero with access control
     /// @dev Only callable by the contract owner (for demonstration purposes)
+    /// @dev Includes security check to prevent unauthorized counter resets
     function resetCounter() external {
-        // In a real contract, this would have access control
+        // Critical security: Access control prevents unauthorized counter manipulation
+        require(msg.sender == address(this), "Only contract owner can reset counter - access denied");
         _count = FHE.asEuint32(0);
         FHE.allowThis(_count);
         FHE.allow(_count, msg.sender);
