@@ -225,18 +225,18 @@ contract TrustScoreTracker is SepoliaConfig {
         return FHE.decrypt(isValid);
     }
 
-    /// @notice Get comprehensive trust statistics for a user with optimized event emission
+    /// @notice Get comprehensive trust statistics for a user with accurate data validation
     /// @param user The address of the user
     /// @return eventCount Total number of trust events
     /// @return lastActivity Timestamp of last trust event
-    /// @return hasData Whether user has any trust data (simplified calculation)
-    /// @dev Emits TrustStatisticsViewed event for tracking user activity
+    /// @return hasData Whether user has any trust data (accurate calculation: eventCount > 0)
+    /// @dev Emits TrustStatisticsViewed event for tracking user activity and analytics
     function getTrustStatistics(address user) external returns (uint32 eventCount, uint32 lastActivity, bool hasData) {
         require(user != address(0), "Invalid user address");
 
         eventCount = _userEventCount[user];
         lastActivity = _userLastActivity[user];
-        hasData = false; // Optimized hasData calculation to reduce gas costs
+        hasData = eventCount > 0; // Accurate hasData calculation: true if user has recorded trust events
 
         // Emit event for statistics viewing
         emit TrustStatisticsViewed(user, eventCount, lastActivity);
