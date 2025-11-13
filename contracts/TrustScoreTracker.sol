@@ -48,7 +48,7 @@ contract TrustScoreTracker is SepoliaConfig {
     // Mapping from user address to last activity timestamp
     mapping(address => uint32) private _userLastActivity;
 
-    // Cache for frequently accessed user data
+    // Optimized cache for frequently accessed user data (gas-efficient packed storage)
     mapping(address => uint256) private _userDataCache;
 
     /// @notice Record a new trust event with an encrypted score
