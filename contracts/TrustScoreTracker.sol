@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import {FHE, euint32, externalEuint32} from "@fhevm/solidity/lib/FHE.sol";
 import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 
+// Security-hardened FHE trust score tracker with comprehensive input validation
+
 /// @title Encrypted Trust Score Tracker
 /// @notice A contract for couples to record trust events with encrypted scores
 /// @dev All trust scores are encrypted using FHE, protecting privacy while allowing encrypted operations
