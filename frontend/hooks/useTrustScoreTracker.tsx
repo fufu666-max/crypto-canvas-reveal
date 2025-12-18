@@ -88,6 +88,11 @@ export const useTrustScoreTracker = (parameters: {
   const [isDecrypting, setIsDecrypting] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
+  const [decryptionStatus, setDecryptionStatus] = useState<{
+    step: "idle" | "generating_keys" | "signing" | "requesting_gateway" | "decrypting_locally" | "completed" | "error";
+    message: string;
+    details?: string;
+  }>({ step: "idle", message: "" });
 
   const trustScoreTrackerRef = useRef<TrustScoreTrackerInfoType | undefined>(undefined);
   const isRefreshingRef = useRef<boolean>(isRefreshing);
@@ -249,6 +254,10 @@ export const useTrustScoreTracker = (parameters: {
 
     isDecryptingRef.current = true;
     setIsDecrypting(true);
+    setDecryptionStatus({ 
+      step: "generating_keys", 
+      message: "Generating session-specific keypair for secure decryption..." 
+    });
     setMessage("Start decrypting trust scores...");
 
     const run = async () => {
@@ -258,6 +267,10 @@ export const useTrustScoreTracker = (parameters: {
         !sameSigner.current(thisEthersSigner);
 
       try {
+        setDecryptionStatus({ 
+          step: "signing", 
+          message: "Requesting wallet signature to authorize decryption..." 
+        });
         setMessage("Loading decryption signature...");
 
         const sig: FhevmDecryptionSignature | null =
@@ -269,18 +282,25 @@ export const useTrustScoreTracker = (parameters: {
           );
 
         if (!sig) {
+          setDecryptionStatus({ step: "error", message: "Decryption authorization failed." });
           setMessage("Unable to build FHEVM decryption signature");
           return;
         }
 
         if (isStale()) {
+          setDecryptionStatus({ step: "idle", message: "" });
           setMessage("Ignore FHEVM decryption");
           return;
         }
 
+        setDecryptionStatus({ 
+          step: "requesting_gateway", 
+          message: "Contacting Zama Gateway to re-encrypt data for your session key..." 
+        });
         setMessage("Calling FHEVM userDecrypt... This may take a moment...");
 
         const handlesToDecrypt: Array<{ handle: string; contractAddress: string }> = [];
+        // ... (rest of handles logic)
         if (thisTotalHandle && thisTotalHandle !== ethers.ZeroHash) {
           handlesToDecrypt.push({ handle: thisTotalHandle, contractAddress: thisContractAddress });
         }
@@ -313,9 +333,14 @@ export const useTrustScoreTracker = (parameters: {
 
         const res = await Promise.race([decryptPromise, timeoutPromise]);
 
+        setDecryptionStatus({ 
+          step: "decrypting_locally", 
+          message: "Locally decrypting the data using your session's private key..." 
+        });
         setMessage("FHEVM userDecrypt completed!");
 
         if (isStale()) {
+          setDecryptionStatus({ step: "idle", message: "" });
           setMessage("Ignore FHEVM decryption");
           return;
         }
@@ -341,8 +366,17 @@ export const useTrustScoreTracker = (parameters: {
         });
         setTrustScores(updatedScores);
 
+        setDecryptionStatus({ 
+          step: "completed", 
+          message: "Trust scores revealed successfully!" 
+        });
         setMessage("Trust scores decrypted successfully!");
       } catch (error: any) {
+        setDecryptionStatus({ 
+          step: "error", 
+          message: "Decryption failed.",
+          details: error?.message || "Unknown error"
+        });
         console.error("Decryption error:", error);
         if (error?.message?.includes("timeout")) {
           setMessage("Decryption timeout: The operation took too long. This may happen if the relayer service is slow. Please try again.");
@@ -503,6 +537,7 @@ export const useTrustScoreTracker = (parameters: {
     isRefreshing,
     isRecording,
     isDeployed,
+    decryptionStatus,
   };
 };
 

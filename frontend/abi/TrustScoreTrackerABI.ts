@@ -16,25 +16,6 @@ export const TrustScoreTrackerABI = {
         },
         {
           "indexed": false,
-          "internalType": "uint8",
-          "name": "requestType",
-          "type": "uint8"
-        }
-      ],
-      "name": "DecryptionRequested",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "user",
-          "type": "address"
-        },
-        {
-          "indexed": false,
           "internalType": "uint32",
           "name": "eventCount",
           "type": "uint32"
@@ -54,12 +35,18 @@ export const TrustScoreTrackerABI = {
         },
         {
           "indexed": false,
-          "internalType": "uint8",
-          "name": "queryType",
-          "type": "uint8"
+          "internalType": "uint32",
+          "name": "totalEvents",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "lastActivity",
+          "type": "uint32"
         }
       ],
-      "name": "TrustScoreQueried",
+      "name": "TrustStatisticsViewed",
       "type": "event"
     },
     {
@@ -208,6 +195,35 @@ export const TrustScoreTrackerABI = {
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "getTrustStatistics",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "eventCount",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "lastActivity",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "hasData",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

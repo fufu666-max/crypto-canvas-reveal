@@ -61,8 +61,8 @@ A privacy-preserving application for couples to record and track trust events us
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/wawsyy/pro24.git
-   cd pro24
+   git clone https://github.com/LauraCommons/crypto-canvas-reveal.git
+   cd crypto-canvas-reveal
    ```
 
 2. **Install dependencies**
@@ -190,7 +190,7 @@ A privacy-preserving application for couples to record and track trust events us
 ## 📁 Project Structure
 
 ```
-pro24/
+crypto-canvas-reveal/
 ├── contracts/                    # Smart contract source files
 │   ├── FHECounter.sol           # Example FHE counter contract
 │   └── TrustScoreTracker.sol    # Main FHE trust score tracker contract

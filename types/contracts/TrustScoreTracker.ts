@@ -33,15 +33,13 @@ export interface TrustScoreTrackerInterface extends Interface {
       | "getTrustEventCount"
       | "getTrustScoreByIndex"
       | "getTrustScoreRange"
+      | "getTrustStatistics"
       | "protocolId"
       | "recordTrustEvent"
   ): FunctionFragment;
 
   getEvent(
-    nameOrSignatureOrTopic:
-      | "DecryptionRequested"
-      | "TrustEventRecorded"
-      | "TrustScoreQueried"
+    nameOrSignatureOrTopic: "TrustEventRecorded" | "TrustStatisticsViewed"
   ): EventFragment;
 
   encodeFunctionData(
@@ -71,6 +69,10 @@ export interface TrustScoreTrackerInterface extends Interface {
   encodeFunctionData(
     functionFragment: "getTrustScoreRange",
     values: [AddressLike, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTrustStatistics",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "protocolId",
@@ -109,24 +111,15 @@ export interface TrustScoreTrackerInterface extends Interface {
     functionFragment: "getTrustScoreRange",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTrustStatistics",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "protocolId", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "recordTrustEvent",
     data: BytesLike
   ): Result;
-}
-
-export namespace DecryptionRequestedEvent {
-  export type InputTuple = [user: AddressLike, requestType: BigNumberish];
-  export type OutputTuple = [user: string, requestType: bigint];
-  export interface OutputObject {
-    user: string;
-    requestType: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace TrustEventRecordedEvent {
@@ -142,12 +135,21 @@ export namespace TrustEventRecordedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace TrustScoreQueriedEvent {
-  export type InputTuple = [user: AddressLike, queryType: BigNumberish];
-  export type OutputTuple = [user: string, queryType: bigint];
+export namespace TrustStatisticsViewedEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    totalEvents: BigNumberish,
+    lastActivity: BigNumberish
+  ];
+  export type OutputTuple = [
+    user: string,
+    totalEvents: bigint,
+    lastActivity: bigint
+  ];
   export interface OutputObject {
     user: string;
-    queryType: bigint;
+    totalEvents: bigint;
+    lastActivity: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -240,6 +242,18 @@ export interface TrustScoreTracker extends BaseContract {
     "view"
   >;
 
+  getTrustStatistics: TypedContractMethod<
+    [user: AddressLike],
+    [
+      [bigint, bigint, boolean] & {
+        eventCount: bigint;
+        lastActivity: bigint;
+        hasData: boolean;
+      }
+    ],
+    "nonpayable"
+  >;
+
   protocolId: TypedContractMethod<[], [bigint], "view">;
 
   recordTrustEvent: TypedContractMethod<
@@ -282,6 +296,19 @@ export interface TrustScoreTracker extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "getTrustStatistics"
+  ): TypedContractMethod<
+    [user: AddressLike],
+    [
+      [bigint, bigint, boolean] & {
+        eventCount: bigint;
+        lastActivity: bigint;
+        hasData: boolean;
+      }
+    ],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "protocolId"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -293,13 +320,6 @@ export interface TrustScoreTracker extends BaseContract {
   >;
 
   getEvent(
-    key: "DecryptionRequested"
-  ): TypedContractEvent<
-    DecryptionRequestedEvent.InputTuple,
-    DecryptionRequestedEvent.OutputTuple,
-    DecryptionRequestedEvent.OutputObject
-  >;
-  getEvent(
     key: "TrustEventRecorded"
   ): TypedContractEvent<
     TrustEventRecordedEvent.InputTuple,
@@ -307,25 +327,14 @@ export interface TrustScoreTracker extends BaseContract {
     TrustEventRecordedEvent.OutputObject
   >;
   getEvent(
-    key: "TrustScoreQueried"
+    key: "TrustStatisticsViewed"
   ): TypedContractEvent<
-    TrustScoreQueriedEvent.InputTuple,
-    TrustScoreQueriedEvent.OutputTuple,
-    TrustScoreQueriedEvent.OutputObject
+    TrustStatisticsViewedEvent.InputTuple,
+    TrustStatisticsViewedEvent.OutputTuple,
+    TrustStatisticsViewedEvent.OutputObject
   >;
 
   filters: {
-    "DecryptionRequested(address,uint8)": TypedContractEvent<
-      DecryptionRequestedEvent.InputTuple,
-      DecryptionRequestedEvent.OutputTuple,
-      DecryptionRequestedEvent.OutputObject
-    >;
-    DecryptionRequested: TypedContractEvent<
-      DecryptionRequestedEvent.InputTuple,
-      DecryptionRequestedEvent.OutputTuple,
-      DecryptionRequestedEvent.OutputObject
-    >;
-
     "TrustEventRecorded(address,uint32)": TypedContractEvent<
       TrustEventRecordedEvent.InputTuple,
       TrustEventRecordedEvent.OutputTuple,
@@ -337,15 +346,15 @@ export interface TrustScoreTracker extends BaseContract {
       TrustEventRecordedEvent.OutputObject
     >;
 
-    "TrustScoreQueried(address,uint8)": TypedContractEvent<
-      TrustScoreQueriedEvent.InputTuple,
-      TrustScoreQueriedEvent.OutputTuple,
-      TrustScoreQueriedEvent.OutputObject
+    "TrustStatisticsViewed(address,uint32,uint32)": TypedContractEvent<
+      TrustStatisticsViewedEvent.InputTuple,
+      TrustStatisticsViewedEvent.OutputTuple,
+      TrustStatisticsViewedEvent.OutputObject
     >;
-    TrustScoreQueried: TypedContractEvent<
-      TrustScoreQueriedEvent.InputTuple,
-      TrustScoreQueriedEvent.OutputTuple,
-      TrustScoreQueriedEvent.OutputObject
+    TrustStatisticsViewed: TypedContractEvent<
+      TrustStatisticsViewedEvent.InputTuple,
+      TrustStatisticsViewedEvent.OutputTuple,
+      TrustStatisticsViewedEvent.OutputObject
     >;
   };
 }

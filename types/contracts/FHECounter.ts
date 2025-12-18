@@ -21,7 +21,12 @@ import type {
 
 export interface FHECounterInterface extends Interface {
   getFunction(
-    nameOrSignature: "decrement" | "getCount" | "increment" | "protocolId"
+    nameOrSignature:
+      | "decrement"
+      | "getCount"
+      | "increment"
+      | "protocolId"
+      | "resetCounter"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -37,11 +42,19 @@ export interface FHECounterInterface extends Interface {
     functionFragment: "protocolId",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "resetCounter",
+    values?: undefined
+  ): string;
 
   decodeFunctionResult(functionFragment: "decrement", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getCount", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "increment", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "protocolId", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "resetCounter",
+    data: BytesLike
+  ): Result;
 }
 
 export interface FHECounter extends BaseContract {
@@ -103,6 +116,8 @@ export interface FHECounter extends BaseContract {
 
   protocolId: TypedContractMethod<[], [bigint], "view">;
 
+  resetCounter: TypedContractMethod<[], [void], "nonpayable">;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -127,6 +142,9 @@ export interface FHECounter extends BaseContract {
   getFunction(
     nameOrSignature: "protocolId"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "resetCounter"
+  ): TypedContractMethod<[], [void], "nonpayable">;
 
   filters: {};
 }
